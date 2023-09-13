@@ -39,10 +39,10 @@ build:
   id_tokens:
     GITOPS_DEMO_VAULT_JWT:
       aud: "GITOPS-DEMO"
-  extends: [.secrets, .terraform:build]
+  #extends: [.secrets, .terraform:build]
 
 deploy:
-  extends: [.secrets, .terraform:deploy]
+  #extends: [.secrets, .terraform:deploy]
   id_tokens:
     GITOPS_DEMO_VAULT_JWT:
       aud: "GITOPS-DEMO"
@@ -52,7 +52,7 @@ deploy:
     auto_stop_in: 4 hours
 
 destroy:
-  extends: [.secrets, .terraform:destroy]
+  #extends: [.secrets, .terraform:destroy]
   needs: []
   id_tokens:
     GITOPS_DEMO_VAULT_JWT:
