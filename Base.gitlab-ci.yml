@@ -23,6 +23,12 @@ variables:
 
 before_script:
   - echo -e "credentials \"$CI_SERVER_HOST\" {\n  token = \"$CI_JOB_TOKEN\"\n}" > $TF_CLI_CONFIG_FILE
+  - cat  $TF_CLI_CONFIG_FILE
+  - backend-config="address=${TF_ADDRESS}" 
+  - backend-config="lock_address=${TF_ADDRESS}/lock" -backend-config="unlock_address=${TF_ADDRESS}/lock" -backend-config="username=$CI_SERVER_HOST" -backend-config="password=$CI_JOB_TOKEN" 
+  - backend-config="lock_method=POST" 
+  - backend-config="unlock_method=DELETE" 
+  - backend-config="retry_wait_min=5"  
   - cd ${TF_ROOT}
 
 cache:
@@ -44,9 +50,9 @@ cache:
 .terraform:build:
   stage: build
   script:
-    - gitlab-terraform plan -lock=false
-    - gitlab-terraform plan-json -lock=false
-  resource_group: ${TF_STATE_NAME}
+    - gitlab-terraform plan -input=false
+    - gitlab-terraform plan-json -input=false
+  #resource_group: ${TF_STATE_NAME}
   artifacts:
     # The next line, which disables public access to pipeline artifacts, may not be available everywhere.
     # See: https://docs.gitlab.com/ee/ci/yaml/#artifactspublic
@@ -59,8 +65,8 @@ cache:
 .terraform:deploy:
   stage: deploy
   script:
-    - gitlab-terraform apply -lock=false
-  resource_group: ${TF_STATE_NAME}
+    - gitlab-terraform apply -input=false
+  #resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -69,6 +75,6 @@ cache:
 .terraform:destroy:
   stage: cleanup
   script:
-    - gitlab-terraform destroy -lock=false
-  resource_group: ${TF_STATE_NAME}
+    - gitlab-terraform destroy -input=false
+  #resource_group: ${TF_STATE_NAME}
   when: manual
