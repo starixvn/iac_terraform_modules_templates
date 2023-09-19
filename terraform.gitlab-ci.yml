@@ -1,5 +1,10 @@
 #include:
-#  - template: Terraform.latest.gitlab-ci.yml
+  #- template: Terraform/Base.latest.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Terraform/Base.latest.gitlab-ci.yml
+  #- template: Jobs/SAST-IaC.latest.gitlab-ci.yml   # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/SAST-IaC.latest.gitlab-ci.yml
+include:
+  - project: "iac-terraform/demo/infra/templates"
+    ref: main
+    file: "Base.gitlab-ci.yml"
 
 stages:
   - validate
@@ -8,56 +13,24 @@ stages:
   - deploy
   - cleanup
 
-variables:
-  TF_IN_AUTOMATION: "true"
-  TF_STATE_NAME: production
-  TF_CACHE_KEY: default
-
-vault ping:
-  image:
-    name: hashicorp/vault:latest
-    entrypoint:
-        - '/usr/bin/env'
-        - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-  stage: .pre
-  script:
-    - echo "Check status of $VAULT_ADDR"
-    - |
-      until vault status
-      do
-        echo "Vault returned error or sealed"
-        sleep 5
-      done
-  rules:
-    - if: '$VAULT_ADDR'
-      when: always
-
 fmt:
-  allow_failure: false
+  extends: .terraform:fmt
+  needs: []
+
+validate:
+  extends: .terraform:validate
+  needs: []
 
 build:
-  id_tokens:
-    GITOPS_DEMO_VAULT_JWT:
-      aud: "GITOPS-DEMO"
-  #extends: [.secrets, .terraform:build]
+  extends: .terraform:build
+  environment:
+    name: $TF_STATE_NAME
+    action: prepare
 
 deploy:
-  #extends: [.secrets, .terraform:deploy]
-  id_tokens:
-    GITOPS_DEMO_VAULT_JWT:
-      aud: "GITOPS-DEMO"
+  extends: .terraform:deploy
+  dependencies:
+    - build
   environment:
     name: $TF_STATE_NAME
-    on_stop: destroy
-    auto_stop_in: 4 hours
-
-destroy:
-  #extends: [.secrets, .terraform:destroy]
-  needs: []
-  id_tokens:
-    GITOPS_DEMO_VAULT_JWT:
-      aud: "GITOPS-DEMO"
-  environment:
-    name: $TF_STATE_NAME
-    action: stop
-
+    action: start
