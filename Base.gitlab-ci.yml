@@ -49,7 +49,7 @@ cache:
 .terraform:deploy:
   stage: deploy
   script:
-    - gitlab-terraform apply
+    - gitlab-terraform apply -lock=false
   resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
@@ -59,6 +59,6 @@ cache:
 .terraform:destroy:
   stage: cleanup
   script:
-    - gitlab-terraform destroy
+    - gitlab-terraform destroy -lock=false
   resource_group: ${TF_STATE_NAME}
   when: manual
