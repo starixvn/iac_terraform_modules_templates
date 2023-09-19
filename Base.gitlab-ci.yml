@@ -14,6 +14,16 @@ image:
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}  # The relative path to the root directory of the Terraform project
   TF_STATE_NAME: default      # The name of the state file used by the GitLab Managed Terraform state backend
+  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${CI_PROJECT_NAME}
+  TF_VAR_app_key: ${APP_KEY}
+  TF_VAR_api_key: ${API_KEY}
+  TF_VAR_gitlab_token: ${CI_JOB_TOKEN}
+  TF_VAR_environment: ${ENV}
+  TF_CLI_CONFIG_FILE: $CI_PROJECT_DIR/.terraformrc
+
+before_script:
+  - echo -e "credentials \"$CI_SERVER_HOST\" {\n  token = \"$CI_JOB_TOKEN\"\n}" > $TF_CLI_CONFIG_FILE
+  - cd ${TF_ROOT}
 
 cache:
   key: "${TF_ROOT}"
@@ -49,7 +59,7 @@ cache:
 .terraform:deploy:
   stage: deploy
   script:
-    - gitlab-terraform apply -lock=false
+    - gitlab-terraform apply
   resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
