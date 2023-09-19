@@ -52,8 +52,8 @@ cache:
 .terraform:build:
   stage: build
   script:
-    - gitlab-terraform plan -input=false
-    - gitlab-terraform plan-json -input=false
+    - gitlab-terraform plan -lock=false
+    - gitlab-terraform plan-json -lock=false
   #resource_group: ${TF_STATE_NAME}
   artifacts:
     # The next line, which disables public access to pipeline artifacts, may not be available everywhere.
@@ -67,7 +67,7 @@ cache:
 .terraform:deploy:
   stage: deploy
   script:
-    - gitlab-terraform apply -input=false
+    - gitlab-terraform apply -lock=false
   #resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
@@ -77,6 +77,6 @@ cache:
 .terraform:destroy:
   stage: cleanup
   script:
-    - gitlab-terraform destroy -input=false
+    - gitlab-terraform destroy -lock=false
   #resource_group: ${TF_STATE_NAME}
   when: manual
