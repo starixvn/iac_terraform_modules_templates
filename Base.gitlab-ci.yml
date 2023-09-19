@@ -70,14 +70,14 @@ cache:
       - ${TF_ROOT}/$PLAN
       - ${TF_ROOT}/${JSON_PLAN_FILE}
     expire_in: 7 days
-  #resource_group: ${TF_STATE_NAME}
+  resource_group: ${TF_STATE_NAME}
       
 
 .terraform:deploy:
   stage: deploy
   script:
     - terraform apply -input=false -auto-approve $PLAN
-  #resource_group: ${TF_STATE_NAME}
+  resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -86,6 +86,6 @@ cache:
 .terraform:destroy:
   stage: cleanup
   script:
-    - terraform destroy
-  #resource_group: ${TF_STATE_NAME}
+    - terraform destroy -auto-approve
+  resource_group: ${TF_STATE_NAME}
   when: manual
