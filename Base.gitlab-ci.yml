@@ -20,8 +20,9 @@ variables:
   TF_CLI_CONFIG_FILE: $CI_PROJECT_DIR/.terraformrc
 
 before_script:
-  # - echo -e "credentials \"$CI_USER\" {\n  token = \"$CI_PASS\"\n}" > $TF_CLI_CONFIG_FILE
-  # - cat  $TF_CLI_CONFIG_FILE
+  - echo -e "credentials \"$CI_USER\" {\n  token = \"$CI_PASS\"\n}" > $TF_CLI_CONFIG_FILE
+  - cat  $TF_CLI_CONFIG_FILE
+  - cd ${TF_ROOT}
   - gitlab-terraform -v
   - gitlab-terraform init
     -backend-config="address=${TF_ADDRESS}" 
@@ -29,7 +30,6 @@ before_script:
     -backend-config="lock_method=POST" 
     -backend-config="unlock_method=DELETE" 
     -backend-config="retry_wait_min=5"  
-  - cd ${TF_ROOT}
 
 cache:
   key: "${TF_ROOT}"
