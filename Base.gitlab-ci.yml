@@ -8,8 +8,14 @@
 #
 # There is a more opinionated template which we suggest the users to abide,
 # which is the lib/gitlab/ci/templates/Terraform.gitlab-ci.yml
+#image:
+  #name: "$DOCKER_REG_LOCAL_URL/base/hashicorp/terraform:1.4" #"$CI_TEMPLATE_REGISTRY_HOST/gitlab-org/terraform-images/releases/1.4:v1.0.0"
 image:
-  name: "$DOCKER_REG_LOCAL_URL/base/hashicorp/terraform:1.4" #"$CI_TEMPLATE_REGISTRY_HOST/gitlab-org/terraform-images/releases/1.4:v1.0.0"
+  name: $DOCKER_REG_LOCAL_URL/base/hashicorp/terraform:1.4.5
+  entrypoint:
+      - "/usr/bin/env"
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}  # The relative path to the root directory of the Terraform project
@@ -23,8 +29,8 @@ before_script:
   - echo -e "credentials \"$CI_USER\" {\n  token = \"$CI_PASS\"\n}" > $TF_CLI_CONFIG_FILE
   - cat  $TF_CLI_CONFIG_FILE
   - cd ${TF_ROOT}
-  - gitlab-terraform -v
-  - gitlab-terraform init
+  - terraform -v
+  - terraform init
     -backend-config="address=${TF_ADDRESS}" 
     -backend-config="lock_address=${TF_ADDRESS}/lock" -backend-config="unlock_address=${TF_ADDRESS}/lock" -backend-config="username=$CI_USER" -backend-config="password=$CI_PASS" 
     -backend-config="lock_method=POST" 
@@ -39,19 +45,19 @@ cache:
 .terraform:fmt:
   stage: validate
   script:
-    - gitlab-terraform fmt
+    - terraform fmt
   allow_failure: true
 
 .terraform:validate:
   stage: validate
   script:
-    - gitlab-terraform validate
+    - terraform validate
 
 .terraform:build:
   stage: build
   script:
-    - gitlab-terraform plan
-    - gitlab-terraform plan-json
+    - terraform plan
+    - terraform plan-json
   #resource_group: ${TF_STATE_NAME}
   artifacts:
     # The next line, which disables public access to pipeline artifacts, may not be available everywhere.
@@ -65,7 +71,7 @@ cache:
 .terraform:deploy:
   stage: deploy
   script:
-    - gitlab-terraform apply
+    - terraform apply
   #resource_group: ${TF_STATE_NAME}
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $TF_AUTO_DEPLOY == "true"
@@ -75,6 +81,6 @@ cache:
 .terraform:destroy:
   stage: cleanup
   script:
-    - gitlab-terraform destroy
+    - terraform destroy
   #resource_group: ${TF_STATE_NAME}
   when: manual
