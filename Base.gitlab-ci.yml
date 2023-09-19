@@ -9,7 +9,7 @@
 # There is a more opinionated template which we suggest the users to abide,
 # which is the lib/gitlab/ci/templates/Terraform.gitlab-ci.yml
 image:
-  name: "$DOCKER_REG_LOCAL_URL/base/hashicorp/terraform:1.4.5" #"$CI_TEMPLATE_REGISTRY_HOST/gitlab-org/terraform-images/releases/1.4:v1.0.0"
+  name: "$DOCKER_REG_LOCAL_URL/base/hashicorp/terraform:1.4" #"$CI_TEMPLATE_REGISTRY_HOST/gitlab-org/terraform-images/releases/1.4:v1.0.0"
 
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}  # The relative path to the root directory of the Terraform project
