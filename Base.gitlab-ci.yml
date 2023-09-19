@@ -34,8 +34,8 @@ cache:
 .terraform:build:
   stage: build
   script:
-    - gitlab-terraform plan
-    - gitlab-terraform plan-json
+    - gitlab-terraform plan -lock=false
+    - gitlab-terraform plan-json 
   resource_group: ${TF_STATE_NAME}
   artifacts:
     # The next line, which disables public access to pipeline artifacts, may not be available everywhere.
